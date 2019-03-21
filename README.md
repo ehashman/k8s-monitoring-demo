@@ -29,6 +29,13 @@ under the `kube-state-metrics/` folder.
 ```bash
 # Apply KSM configurations to the cluster
 kubectl apply -f kube-state-metrics/
+# clusterrolebinding.rbac.authorization.k8s.io/kube-state-metrics created
+# clusterrole.rbac.authorization.k8s.io/kube-state-metrics created
+# deployment.apps/kube-state-metrics created
+# rolebinding.rbac.authorization.k8s.io/kube-state-metrics created
+# role.rbac.authorization.k8s.io/kube-state-metrics-resizer created
+# serviceaccount/kube-state-metrics created
+# service/kube-state-metrics created
 
 # Start a proxy to verify metrics
 kubectl proxy &
@@ -62,9 +69,18 @@ this repo.
 ```bash
 # Apply Prometheus configurations to the cluster
 kubectl apply -f prometheus/
+# serviceaccount/prometheus created
+# clusterrole.rbac.authorization.k8s.io/prometheus created
+# clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+# configmap/prom-server-config created
+# service/prom-ss created
+# service/prometheus-server created
+# statefulset.apps/prom-ss created
 
 # Port-forward the Prometheus service for web access
 kubectl port-forward -n kube-system svc/prometheus-server 8080:80 &
+# Forwarding from 127.0.0.1:8080 -> 9090
+# Forwarding from [::1]:8080 -> 9090
 ```
 
 Now you can visit the Prometheus web UI in your browser at
