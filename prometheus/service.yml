@@ -1,0 +1,34 @@
+# This headless service is required to set up networking for the StatefulSet.
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: prom-ss
+  namespace: kube-system
+  labels:
+    app: prom-ss
+spec:
+  selector:
+    app: prom-ss
+  clusterIP: None
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9090
+
+# This regular ClusterIP service gives us an internal cluster IP.
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-server
+  namespace: kube-system
+  labels:
+    app: prom-ss
+spec:
+  selector:
+    app: prom-ss
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9090
