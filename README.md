@@ -89,6 +89,66 @@ http://127.0.0.1:8080/graph and try out some queries. Perhaps you could check if
 [prometheus]: https://prometheus.io/
 [prometheus-operator]: https://github.com/coreos/prometheus-operator
 
+## Query Prometheus
+
+Here are a number of PromQL queries you can try out against your Prometheus
+instance.
+
+### General pod info
+
+```
+kube_pod_info                      # pod IP, node pod is scheduled on, controller type for pod
+kube_pod_container_info            # container names in a pod, ID, images
+kube_pod_container_restarts_total  # number of times a container has restarted
+sum(kubelet_running_pod_count)     # all running pods
+```
+
+### CPU usage (cpu cores)
+
+```
+sum(rate(container_cpu_usage_seconds_total{container_name!="POD"}[1m])) by (container_name,pod_name)  # actual CPU use per container
+kube_pod_container_resource_requests_cpu_cores  # CPU requested by each container
+kube_pod_container_resource_limits_cpu_cores    # CPU limits for each container
+```
+
+### Memory usage (bytes)
+
+```
+sum(container_memory_working_set_bytes{container_name!="POD"}) by (container_name,pod_name)  # actual memory use per container
+sum(container_memory_usage_bytes{container_name!="POD"}) by (container_name,pod_name)  # reserved memory in use per container
+kube_pod_container_resource_requests_memory_bytes  # memory requested by each container
+kube_pod_container_resource_limits_memory_bytes    # memory limits for each container
+```
+
+### Network usage (b/s)
+
+```
+sum(rate(container_network_receive_bytes_total{container_name!="POD"}[1m])) by (container_name,pod_name)  # bytes received per second per container
+-sum(rate(container_network_transmit_bytes_total{container_name!="POD"}[1m])) by (container_name)  # bytes transmitted per second per container
+```
+
+### General cluster info
+
+```
+sum(up{job="kubernetes-nodes"})                           # number of online nodes
+sum(kube_node_spec_unschedulable)                         # number of unavailable nodes
+max(avg_over_time(up{job="kubernetes-apiservers"}[1d]))   # control plane uptime
+count(kube_service_info)                                  # running services
+sum(machine_cpu_cores)                                    # total cluster CPUs
+sum(rate(container_cpu_usage_seconds_total{id="/"}[1m]))  # total used CPUs
+sum(machine_cpu_cores) - sum(label_join(machine_cpu_cores, "node", "", "kubernetes_io_hostname") * ON(node) kube_node_spec_unschedulable)  # total available CPUs
+sum(machine_memory_bytes)                                 # total cluster memory
+sum(container_memory_working_set_bytes{id="/"})           # total used memory
+sum(machine_memory_bytes) - sum(label_join(machine_memory_bytes, "node", "", "kubernetes_io_hostname") * ON(node) kube_node_spec_unschedulable)  # total available memory
+```
+
+### Control plane info
+
+```
+sum(rate(apiserver_request_count[1m])) by (verb)  # control plane throughput by HTTP verb)
+histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{verb!="WATCH",verb!="CONNECT"}[1m])) by (le, verb))  # p99 control plane latencies by verb
+```
+
 # License
 
 Copyright (c) 2019 Two Sigma Investments, LP.
