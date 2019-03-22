@@ -24,6 +24,7 @@ spec:
         args:
         - "--config.file=/etc/prometheus/prometheus.yml"
         - "--storage.tsdb.path=/prometheus/"
+        - "--storage.tsdb.retention.time=1d"
         ports:
         - containerPort: 9090
         volumeMounts:
@@ -43,4 +44,4 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 1Gi
+          storage: 8Gi
