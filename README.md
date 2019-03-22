@@ -92,7 +92,18 @@ http://127.0.0.1:8080/graph and try out some queries. Perhaps you could check if
 ## Query Prometheus
 
 Here are a number of PromQL queries you can try out against your Prometheus
-instance.
+instance. You can browse all available timeseries in the Prometheus graph UI by
+clicking on the dropdown list.
+
+The timeseries names tell us the source of the various metrics:
+
+- `apiserver_*` metrics are provided by the API servers
+- `kube_*` metrics are provided by `kube-state-metrics`
+- `kubelet_*` metrics are provided by the kubelets
+- `container_*` metrics are provided by cadvisor
+
+There are also some built-in metrics that are generated at Prometheus scrape
+time, such as `up` (whether a scrape target is up or not).
 
 ### General pod info
 
