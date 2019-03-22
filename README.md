@@ -136,9 +136,18 @@ max(avg_over_time(up{job="kubernetes-apiservers"}[1d]))   # control plane uptime
 count(kube_service_info)                                  # running services
 sum(machine_cpu_cores)                                    # total cluster CPUs
 sum(rate(container_cpu_usage_seconds_total{id="/"}[1m]))  # total used CPUs
-sum(machine_cpu_cores) - sum(label_join(machine_cpu_cores, "node", "", "kubernetes_io_hostname") * ON(node) kube_node_spec_unschedulable)  # total available CPUs
 sum(machine_memory_bytes)                                 # total cluster memory
 sum(container_memory_working_set_bytes{id="/"})           # total used memory
+```
+
+Suppose some of our machines are unschedulable (i.e. the kubelet is posting an
+issue or someone ran `kubectl cordon` on the node). How might we calculate what
+capacity in our cluster is actually available for scheduling?
+
+We could do some label joins with PromQL to figure this out:
+
+```
+sum(machine_cpu_cores) - sum(label_join(machine_cpu_cores, "node", "", "kubernetes_io_hostname") * ON(node) kube_node_spec_unschedulable)  # total available CPUs
 sum(machine_memory_bytes) - sum(label_join(machine_memory_bytes, "node", "", "kubernetes_io_hostname") * ON(node) kube_node_spec_unschedulable)  # total available memory
 ```
 
